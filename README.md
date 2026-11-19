@@ -114,7 +114,7 @@ Proposal 中 family status、education、多个 fairness metrics、attribution �
 | `audit_outputs/oof_lgb_domain_features.csv` | 全量 `SK_ID_CURR, TARGET, oof_score`；新分析的基础 |
 | `audit_outputs/oof_with_gender.csv` | 上述分数 + 原始 gender |
 | `audit_outputs/gender_false_positive_rates.png` | 可用于 slides 的图 |
-| `data/application_data.zip` | 两份原始 main-table CSV 的无损压缩包；先解压再运行 |
+| `data/application_data.zip` | 两份原始 main-table CSV 的无损压缩包；开头配置 cell 会自动解压 |
 | `original/start-here-a-gentle-introduction_v17.ipynb` | 原作者 notebook，保留作来源参考 |
 | `HCDR_proposal.pdf`、`proposal/proposal.tex` | 之前的 proposal 文件 |
 | 根目录各模型 prediction CSV | 无标签 test predictions；不用于当前 subgroup ground-truth audit |
@@ -137,7 +137,7 @@ python -m pip install -r requirements.txt
 jupyter lab
 ```
 
-仓库为 private，须先拥有访问权限并完成 GitHub 登录。Windows 的环境激活命令为 `.venv\Scripts\activate`。从仓库根目录启动 notebook，默认 `DATA_DIR = 'data/'`。原始训练 CSV 约 166 MB，仓库保留约 42 MB 的 ZIP，解压后的 CSV 不进入 Git；本地已有 CSV 内容未改动。压缩包已通过 CRC 校验。
+仓库为 private，须先拥有访问权限并完成 GitHub 登录。Windows 的环境激活命令为 `.venv\Scripts\activate`。先运行 notebook 的第 2 个 cell（数据配置）：它会查找项目数据目录，并自动解压缺失的 CSV，不覆盖已有 CSV。若项目存放在其他位置，可把该 cell 的 `DATA_DIR_OVERRIDE` 设为数据文件夹的绝对路径。原始训练 CSV 约 166 MB，仓库保留约 42 MB 的 ZIP，解压后的 CSV 不进入 Git；本地已有 CSV 内容未改动。压缩包已通过 CRC 校验。
 
 `requirements.txt` 是按 notebook imports 整理的依赖清单，**不是原训练环境的 lockfile**；全新环境和 Colab 仍需运行验证。不同软件版本可能带来数值变化。
 
@@ -151,7 +151,7 @@ jupyter lab
 
 Notebook 已记录最小运行顺序，以当前文件中的 **1-based cell 位置**计：`2, 5, 8, 10, 28, 29, 31, 42, 44, 49, 79, 80, 116, 121`，随后运行 November 17 update 的全部代码 cells。插入新 cell 后位置会变，应结合标题和变量确认。这沿用 notebook 现有训练设置；当前 README 上传工作未重跑这条训练路径。
 
-Colab 需要将 notebook、解压后的数据与已有 `audit_outputs/` 放在同一个项目目录下（例如 Drive），挂载 Drive 后调整 `DATA_DIR`。审计输出写在 `DATA_DIR` 父目录的 `audit_outputs/` 下。提交前要实际验证 Colab，不能把本地保存输出当成 Colab 已运行的证据。
+Colab 需要将 notebook、解压后的数据与已有 `audit_outputs/` 放在同一个项目目录下（例如 Drive），挂载 Drive 后设置配置 cell 的 `DATA_DIR_OVERRIDE` 并运行该 cell；也可使用压缩包，由配置 cell 自动解压。审计输出写在 `DATA_DIR` 父目录的 `audit_outputs/` 下。提交前要实际验证 Colab，不能把本地保存输出当成 Colab 已运行的证据。
 
 ## 9. 来源与协作记录
 
@@ -159,3 +159,9 @@ Colab 需要将 notebook、解压后的数据与已有 `audit_outputs/` 放在�
 - 原始实现：[Will Koehrsen — Start Here: A Gentle Introduction](https://www.kaggle.com/code/willkoehrsen/start-here-a-gentle-introduction)，version 17。
 - 当前进度以本仓库代码和 `audit_outputs/` 为依据。原 notebook 中的历史 leaderboard 分数和文字结论不是我们这次的实测结果。
 - 本 README 在 AI 辅助下根据本地 notebook、输出文件与课程要求整理；报告的 AI Disclosure 应如实涵盖实际使用过程，并由全组核对。新实验请记录谁做了什么、参数／阈值、输出文件及验证方式，以便最终 contribution statement 有据可查。
+
+### 遇到 `FileNotFoundError: application_train.csv`
+
+GitHub 中的数据保存在 `data/application_data.zip`，单独下载 notebook 不会带上数据。先更新 notebook，确认压缩包已下载，再运行第 2 个 cell。成功后会显示 `Data ready: ...`，随后再运行 imports 和 `pd.read_csv`。若在 Colab，只打开 GitHub notebook 也不会自动下载仓库的数据，需要上传压缩包或挂载 Drive，并设置 `DATA_DIR_OVERRIDE`。
+
+旧版 notebook 可手动将 `application_data.zip` 解压到 `data/`，保证其中直接包含 `application_train.csv` 和 `application_test.csv`；将 `DATA_DIR` 指向该目录并以 `/` 结尾，然后重新运行读取 cell。
