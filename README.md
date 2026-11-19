@@ -1,6 +1,6 @@
 # Home Credit Audit｜小组进度 Debrief
 
-更新：2026-11-18。给刚加入讨论的组员：先读第 1–4 节，再看图和第 6 节任务；不需要先读完长 notebook。
+更新：2026-11-18。先读第 1–4 节，再看图和第 6 节任务；不需要先读完长 notebook。
 
 **我们正在做 DS-US 202 的 Responsible Data Science 项目：审计一个公开的贷款风险模型。当前已选定 LightGBM + domain features，导出全部有标签申请的 OOF scores，并完成第一项 gender FPR 对比。接下来要把这个 preliminary finding 做成 presentation，并扩展审计、整理 report 和 Colab。**
 
