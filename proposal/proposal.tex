@@ -1,0 +1,72 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=*}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+{\large\bfseries DS-US 202 Project Proposal: Technical Audit of the Home Credit Default Risk ADS}\\[2pt]
+\textbf{Team:} [Member 1 (NetID)], [Member 2 (NetID)], [Member 3 (NetID)], [Member 4 (NetID)] \hfill October 14, 2026
+
+\paragraph{ADS under audit.}
+We will audit a credit default risk model built for the \emph{Home Credit Default Risk} Kaggle competition~\cite{competition}.
+Home Credit is a consumer lender that targets applicants with little or no credit history. The ADS takes a loan application
+and outputs a score for the risk that the applicant will have payment difficulties (\texttt{TARGET}=1). The lender uses this
+score to decide whether to approve the loan. The competition ranked submissions by ROC AUC on a hidden test set.
+
+\paragraph{Data.}
+We use the official competition data~\cite{competition}, downloaded from Kaggle under the competition rules. The audited
+implementation uses the main application table: \texttt{application\_train.csv} (307,511 applications $\times$ 122 columns,
+8.07\% positive) and \texttt{application\_test.csv} (48,744 applications, unlabeled). The features include demographics
+(sex, age, family status, education, number of children), income and loan amounts, employment and housing information, and
+three normalized scores from external data sources (\texttt{EXT\_SOURCE\_1--3}). The competition also provides auxiliary tables
+(credit bureau records, previous applications, installment histories) that the baseline does not use.
+
+\paragraph{Implementation.}
+We audit the public notebook \emph{Start Here: A Gentle Introduction} by Will Koehrsen (version~17)~\cite{koehrsen}.
+\begin{itemize}
+  \item \textbf{Preprocessing:} label and one-hot encoding of categorical features; a flag for the anomalous
+        \texttt{DAYS\_EMPLOYED}~=~365243 code; median imputation; min--max scaling; optional polynomial and domain-knowledge features.
+  \item \textbf{Models:} a logistic regression, random forests, and a LightGBM gradient-boosted model~\cite{lightgbm}
+        trained with 5-fold cross-validation and class weighting. We will focus our audit on the LightGBM model
+        with domain-knowledge features, the final model in the notebook.
+  \item \textbf{Reproduction:} we ran the entire notebook locally from start to finish without errors.
+        We changed only deprecated library calls for current
+        scikit-learn and LightGBM versions; the modelling logic is unchanged.
+\end{itemize}
+
+\paragraph{Why this ADS.}
+Credit approval is a high-stakes decision. This model uses attributes that anti-discrimination law protects in lending (such as
+sex, age and marital status under the U.S.\ Equal Credit Opportunity Act) directly as input features, which lets us audit both
+group fairness and disparate treatment. It also relies heavily on opaque third-party scores, which raises the transparency and
+interpretability questions studied in this course.
+
+\paragraph{Preliminary audit plan.}
+\begin{itemize}
+  \item \textbf{Subgroups:} sex, age bands, family status, and education, plus their intersections.
+  \item \textbf{Accuracy by group:} AUC, TPR/FPR at decision thresholds, and calibration. The model's mean predicted score
+        (0.35) far exceeds the base rate (8\%), so its scores are not calibrated probabilities and we must interpret them with care.
+  \item \textbf{Fairness:} demographic parity, equalized odds, and predictive parity, computed with Fairlearn~\cite{fairlearn}.
+  \item \textbf{Robustness and interpretability:} stability across folds and random seeds, feature attributions,
+        and ablations that remove protected attributes and the external scores.
+\end{itemize}
+
+\vspace{-6pt}
+\begin{thebibliography}{9}\small
+\setlength{\itemsep}{0pt}
+\bibitem{competition} A.~Montoya, inversion, K.~Odintsov, M.~Kotek. \emph{Home Credit Default Risk}. Kaggle, 2018.
+  \url{https://www.kaggle.com/competitions/home-credit-default-risk}
+\bibitem{koehrsen} W.~Koehrsen. \emph{Start Here: A Gentle Introduction} (version 17). Kaggle notebook, 2018.
+  \url{https://www.kaggle.com/code/willkoehrsen/start-here-a-gentle-introduction}
+\bibitem{lightgbm} G.~Ke et al. LightGBM: A Highly Efficient Gradient Boosting Decision Tree. \emph{NeurIPS}, 2017.
+\bibitem{fairlearn} H.~Weerts et al. Fairlearn: Assessing and Improving Fairness of AI Systems. \emph{JMLR} 24(257), 2023.
+\end{thebibliography}
+
+{\small\textbf{AI Disclosure:} We selected a suitable project from Kaggle's beginner resources and manually ran the code locally in
+VS Code. We then used Claude to review our outputs and help check the project's feasibility and whether the model's
+hyperparameter settings were suitable for the baseline analysis.\par}
+
+\end{document}

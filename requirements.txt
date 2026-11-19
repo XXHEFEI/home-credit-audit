@@ -1,0 +1,10 @@
+# Import-based setup list; not a verified lockfile of the original training run.
+numpy
+pandas
+scipy
+scikit-learn
+lightgbm
+matplotlib
+seaborn
+ipython
+jupyterlab
